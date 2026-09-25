@@ -30,6 +30,9 @@ STORAGES = {
     },
 }
 
+RESEND_API_KEY=env("RESEND_API_KEY")
+
 print("=== PRODUCTION SETTINGS ===")
 print("ROOT_URLCONF:", ROOT_URLCONF)
 print("SETTINGS LOADED: production.py")
+print(RESEND_API_KEY)

@@ -1,5 +1,6 @@
 import secrets
 from datetime import timedelta
+import resend
 
 from django.conf import settings
 from django.core import signing
@@ -57,16 +58,18 @@ def send_otp_email(otp):
         if otp.purpose == EmailOTP.EMAIL_CHANGE
         else otp.user.email
     )
-    send_mail(
-        subject="Your Tradesim verification code",
-        message=(
-            f"Your Tradesim code is {otp.otp} "
+
+    resend.api_key = settings.RESEND_API_KEY
+
+    resend.Emails.send({
+        "from": "TradeSim <noreply@pradipkunwar.name.np>",
+        "to": [recipient],
+        "subject": "Your TradeSim verification code",
+        "text": (
+            f"Your TradeSim code is {otp.otp}\n\n"
             f"It expires in {settings.OTP_EXPIRATION_MINUTES} minutes."
         ),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[recipient],
-    )
-
+    })
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
