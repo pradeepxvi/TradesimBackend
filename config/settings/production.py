@@ -4,6 +4,8 @@ from corsheaders.defaults import default_headers
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+from .base import *
+
 
 
 CORS_ALLOW_ALL_ORIGINS = False
@@ -27,3 +29,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+print("=== PRODUCTION SETTINGS ===")
+print("ROOT_URLCONF:", ROOT_URLCONF)
+print("SETTINGS LOADED: production.py")
