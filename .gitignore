@@ -1,0 +1,13 @@
+.env
+.dev.env
+__pycache__/
+*.py[cod]
+*.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
+media/
+staticfiles/
+.venv/
+*.log
+config/settings/development.py
