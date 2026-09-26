@@ -50,6 +50,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             )
         return image
 
+    def get_profile_picture(self, obj): 
+        if not obj.profile_picture: 
+            return None 
+        request = self.context.get("request") 
+        if request: 
+            return request.build_absolute_uri( obj.profile_picture.url ) 
+        return obj.profile_picture.url
+
 
 class MessageSerializer(serializers.Serializer):
     message = serializers.CharField()

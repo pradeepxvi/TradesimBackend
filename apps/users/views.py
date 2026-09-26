@@ -12,6 +12,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.parsers import FormParser, MultiPartParser
 
 from .models import EmailOTP, User
 from .permissions import IsVerifiedUser
@@ -52,6 +53,8 @@ def create_otp(user, purpose):
     return otp
 
 
+
+# production
 def send_otp_email(otp):
     recipient = (
         otp.user.pending_email
@@ -70,6 +73,21 @@ def send_otp_email(otp):
             f"It expires in {settings.OTP_EXPIRATION_MINUTES} minutes."
         ),
     })
+
+# # development
+# def send_otp_email(otp):
+#     recipient = (
+#         otp.user.pending_email
+#         if otp.purpose == EmailOTP.EMAIL_CHANGE
+#         else otp.user.email
+#     )
+
+#     send_mail(
+#         subject= "Your TradeSim verification code",
+#         message=f"Your TradeSim code is {otp.otp}\n\n It expires in {settings.OTP_EXPIRATION_MINUTES} minutes.",
+#         from_email=settings.EMAIL_HOST_USER,
+#         recipient_list=[recipient]
+#     )
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -264,16 +282,26 @@ class PasswordResetView(APIView):
         otp.save(update_fields=["expires_at"])
         return Response({"message": "Password reset successfully."})
 
-
 class ProfileView(APIView):
     permission_classes = [IsVerifiedUser]
-
-    @extend_schema(tags=["Profile"], responses=ProfileSerializer)
-    def get(self, request):
-        return Response(ProfileSerializer(request.user).data)
+    parser_classes = [FormParser, MultiPartParser]
 
     @extend_schema(
-        tags=["Profile"], request=ProfileSerializer, responses=ProfileSerializer
+        tags=["Profile"],
+        responses=ProfileSerializer,
+    )
+    def get(self, request):
+        return Response(
+            ProfileSerializer(
+                request.user,
+                context={"request": request},
+            ).data
+        )
+
+    @extend_schema(
+        tags=["Profile"],
+        request=ProfileSerializer,
+        responses=ProfileSerializer,
     )
     def patch(self, request):
         serializer = ProfileSerializer(
@@ -282,22 +310,42 @@ class ProfileView(APIView):
             partial=True,
             context={"request": request},
         )
+
         serializer.is_valid(raise_exception=True)
+
         new_email = serializer.validated_data.pop("email", None)
+
         if new_email and new_email != request.user.email:
             request.user.pending_email = new_email
-            request.user.save(update_fields=["pending_email", "updated_at"])
-            otp = create_otp(request.user, EmailOTP.EMAIL_CHANGE)
+            request.user.save(
+                update_fields=["pending_email", "updated_at"]
+            )
+
+            otp = create_otp(
+                request.user,
+                EmailOTP.EMAIL_CHANGE,
+            )
             send_otp_email(otp)
+
             return Response(
                 {
                     "message": "Verification code sent to the new email address.",
-                    "profile": ProfileSerializer(request.user).data,
+                    "profile": ProfileSerializer(
+                        request.user,
+                        context={"request": request},
+                    ).data,
                 },
                 status=status.HTTP_202_ACCEPTED,
             )
+
         user = serializer.save()
-        return Response(ProfileSerializer(user).data)
+
+        return Response(
+            ProfileSerializer(
+                user,
+                context={"request": request},
+            ).data
+        )
 
 
 class VerifyEmailChangeView(APIView):
