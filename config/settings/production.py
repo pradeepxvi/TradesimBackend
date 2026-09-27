@@ -52,3 +52,11 @@ DATABASES = {
 
 BREVO_API_KEY=env("BREVO_API_KEY")
 BREVO_SENDER_EMAIL=env("BREVO_SENDER_EMAIL")
+
+
+# temp code
+
+print("DB_NAME:", env("DB_NAME"))
+print("DB_USER:", env("DB_USER"))
+print("DB_HOST:", env("DB_HOST"))
+print("DB_PORT:", env("DB_PORT"))
