@@ -1,5 +1,6 @@
 from .base import *
 from corsheaders.defaults import default_headers
+import dj_database_url
 
 DEBUG = env("DEBUG")
 
@@ -35,17 +36,8 @@ STORAGES = {
 # --------------------------------------------------
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT"),
-    }
+    "default": dj_database_url.parse(env("MYSQL_URL"))
 }
-
-
 # --------------------------------------------------
 # Database
 # --------------------------------------------------
