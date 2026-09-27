@@ -1,10 +1,5 @@
-import secrets
-from datetime import timedelta
-import resend
-
 from django.conf import settings
 from django.core import signing
-from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -32,62 +27,8 @@ from .serializers import (
     UserSummarySerializer,
     load_reset_token,
 )
+from .utils import send_otp_email, create_otp
 
-
-def generate_otp():
-    return f"{secrets.randbelow(1_000_000):06d}"
-
-
-def create_otp(user, purpose):
-    EmailOTP.objects.filter(
-        user=user,
-        purpose=purpose,
-        is_used=False,
-    ).update(is_used=True)
-    otp = EmailOTP.objects.create(
-        user=user,
-        otp=generate_otp(),
-        purpose=purpose,
-        expires_at=timezone.now() + timedelta(minutes=settings.OTP_EXPIRATION_MINUTES),
-    )
-    return otp
-
-
-
-# production
-def send_otp_email(otp):
-    recipient = (
-        otp.user.pending_email
-        if otp.purpose == EmailOTP.EMAIL_CHANGE
-        else otp.user.email
-    )
-
-    resend.api_key = settings.RESEND_API_KEY
-
-    resend.Emails.send({
-        "from": "TradeSim <noreply@pradipkunwar.name.np>",
-        "to": [recipient],
-        "subject": "Your TradeSim verification code",
-        "text": (
-            f"Your TradeSim code is {otp.otp}\n\n"
-            f"It expires in {settings.OTP_EXPIRATION_MINUTES} minutes."
-        ),
-    })
-
-# # development
-# def send_otp_email(otp):
-#     recipient = (
-#         otp.user.pending_email
-#         if otp.purpose == EmailOTP.EMAIL_CHANGE
-#         else otp.user.email
-#     )
-
-#     send_mail(
-#         subject= "Your TradeSim verification code",
-#         message=f"Your TradeSim code is {otp.otp}\n\n It expires in {settings.OTP_EXPIRATION_MINUTES} minutes.",
-#         from_email=settings.EMAIL_HOST_USER,
-#         recipient_list=[recipient]
-#     )
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
