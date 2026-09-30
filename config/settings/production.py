@@ -5,7 +5,6 @@ import dj_database_url
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
-from .base import *
 
 
 CORS_ALLOW_ALL_ORIGINS = False
@@ -44,11 +43,3 @@ DATABASES = {
 
 BREVO_API_KEY=env("BREVO_API_KEY")
 BREVO_SENDER_EMAIL=env("BREVO_SENDER_EMAIL")
-
-
-# temp code
-
-print("DB_NAME:", env("DB_NAME"))
-print("DB_USER:", env("DB_USER"))
-print("DB_HOST:", env("DB_HOST"))
-print("DB_PORT:", env("DB_PORT"))
