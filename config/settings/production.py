@@ -35,11 +35,13 @@ STORAGES = {
 # --------------------------------------------------
 
 DATABASES = {
-    "default": dj_database_url.parse(env("MYSQL_URL"))
+    "default": dj_database_url.parse(
+        env("MYSQL_URL"),
+    ),
 }
 # --------------------------------------------------
 # Database
 # --------------------------------------------------
 
-BREVO_API_KEY=env("BREVO_API_KEY")
-BREVO_SENDER_EMAIL=env("BREVO_SENDER_EMAIL")
+BREVO_API_KEY = env("BREVO_API_KEY")
+BREVO_SENDER_EMAIL = env("BREVO_SENDER_EMAIL")
