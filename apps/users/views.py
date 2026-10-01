@@ -223,6 +223,7 @@ class PasswordResetView(APIView):
         otp.save(update_fields=["expires_at"])
         return Response({"message": "Password reset successfully."})
 
+
 class ProfileView(APIView):
     permission_classes = [IsVerifiedUser]
     parser_classes = [FormParser, MultiPartParser]
@@ -258,9 +259,7 @@ class ProfileView(APIView):
 
         if new_email and new_email != request.user.email:
             request.user.pending_email = new_email
-            request.user.save(
-                update_fields=["pending_email", "updated_at"]
-            )
+            request.user.save(update_fields=["pending_email", "updated_at"])
 
             otp = create_otp(
                 request.user,
